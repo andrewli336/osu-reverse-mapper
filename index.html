@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>osu! Reverse Mapper</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lzma@2.3.2/src/lzma_worker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-md5@0.8.3/build/md5.min.js"></script>
+</head>
+<body>
+    <div id="backgroundLayer"></div>
+    
+    <div id="menuScreen">
+        <h1>osu! Reverse Mapper</h1>
+        <p>
+            This tool lets you map hit circles live using your keyboard and mouse.<br>
+            <strong>By default</strong>, the map <em>"Monochrome Butterfly by Aitsuki Nakuru"</em> and skin <em>"Rafis DT"</em> are automatically loaded.<br>
+            Check the boxes below if you want to upload your own files instead.
+        </p>
+
+        <label>
+            <input type="checkbox" id="customMapToggle" /> 
+            I want to upload my own .osz map
+        </label><br><br>
+
+        <div id="mapUploadSection" class="hidden">
+            <label>Upload .osz File:
+                <input type="file" id="oszInput" accept=".osz" />
+            </label><br><br>
+        </div>
+
+        <label>
+            <input type="checkbox" id="customSkinToggle" /> 
+            I want to upload my own skin
+        </label><br><br>
+
+        <div id="skinUploadSection" class="hidden">
+            <label>Upload .osk Skin File:
+                <input type="file" id="skinInput" accept=".osk,.zip" />
+            </label>
+        </div>
+
+        <div id="csModRow">
+            <div class="cs-container">
+                
+                <div class="cs-slider-wrapper">
+                    <label>Circle Size (CS)</label>
+                    <input type="range" id="csSlider" min="0" max="11" value="4" step="0.1" />
+                    <div class="cs-value">CS <span id="csValue">4.0</span></div>
+
+                    <label>Approach Rate (AR)</label>
+                    <input type="range" id="arSlider" min="0" max="11" value="9" step="0.1" />
+                    <div class="cs-value">AR <span id="arValue">9.0</span></div>
+
+                    <label>Overall Difficulty (OD)</label>
+                    <input type="range" id="odSlider" min="0" max="11" value="8" step="0.1" />
+                    <div class="cs-value">OD <span id="odValue">8.0</span></div>
+                </div>
+                <div class="cs-preview">
+                    <div class="preview-circle" id="previewCircle"></div>
+                </div>
+            </div>
+
+            <details class="mod-details">
+                <summary><strong>Select Mods</strong></summary>
+                <div id="modCheckboxes">
+                    <label><input type="checkbox" value="2"> Easy</label><br>
+                    <label><input type="checkbox" value="8"> Hidden</label><br>
+                    <!--<label><input type="checkbox" value="16"> HardRock</label><br-->
+                    <label><input type="checkbox" value="32"> SuddenDeath</label><br>
+                    <label><input type="checkbox" value="64"> DoubleTime</label><br>
+                    <label><input type="checkbox" value="512"> Nightcore</label><br>
+                    <label><input type="checkbox" value="1024"> Flashlight</label><br>
+                    <label><input type="checkbox" value="16384"> Perfect</label><br>
+                </div>
+            </details>
+        </div>
+
+        <div class="mapping-settings">
+            <label>
+                <input type="checkbox" id="playfieldToggle" checked>
+                Enforce playfield boundaries
+            </label><br>
+
+            <label>
+                <input type="checkbox" id="edgeModeToggle">
+                Edge Mode (snap to edge)
+            </label><br>
+        
+            <label for="snapSelect">Snapping:</label>
+            <select id="snapSelect">
+                <option value="1">1/1</option>
+                <option value="2">1/2</option>
+                <option value="3">1/3</option>
+                <option value="4" selected>1/4</option>
+                <option value="3">1/6</option>
+                <option value="8">1/8</option>
+                <option value="16">1/16</option>
+                <option value="32">1/32</option>
+            </select>
+            <span id="snapBpmInfo">–</span>
+        
+            <fieldset>
+                <legend><strong>Key Bindings</strong></legend>
+                <label>Key 1: <button id="key1Bind">Z</button></label><br>
+                <label>Key 2: <button id="key2Bind">X</button></label>
+            </fieldset>
+        </div>
+
+        <button id="startButton">Start Mapping</button>
+    </div>
+
+    <div id="playScreen" style="display:none;">
+        <canvas id="canvas"></canvas>
+        <div id="playfield"></div>
+        <button id="stopButton">Stop</button>
+      </div>
+
+      <div id="resultScreen" style="display: none; text-align: center; margin-top: 40px;">
+        <h2>Recording Complete!</h2>
+        <p>Your map has been recorded.</p>
+        <button id="downloadMapBtn">Download .osz File</button>
+        <button id="downloadReplayBtn">Download .osr Replay</button><br><br>
+        <button id="backToMenuBtn">Back to Menu</button>
+      </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
