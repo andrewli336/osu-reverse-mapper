@@ -48,6 +48,7 @@ let currentUsername = "Player"; // Default or set from user input
 let beatmapHash = "";
 let numHitObjects = 0;
 let edgeModeEnabled = false;
+let playbackRate = 1.0;
 
 // Circle Size Calculation
 function csToRadius(cs) {
@@ -150,12 +151,13 @@ function playHitSound() {
 function registerHit() {
     if (enforcePlayfieldBoundaries && !isInsidePlayfield(mouseX, mouseY)) return;
 
+    const actualTime = audio.currentTime * playbackRate;
     const time = audio.currentTime;
     if (time - lastHitTime > 0.3) comboCount = 1;
     lastHitTime = time;
 
     const snapTime = getBeatSnapper(parsedOsuData.sections.TimingPoints, snapSubdivision);
-    const snapped = snapTime(time * 1000); // snap in ms
+    const snapped = snapTime(actualTime * 1000); // snap in ms using actual time
 
     let pressedKey = null;
     if (keyDownState[key1]) pressedKey = key1;
@@ -514,6 +516,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.getElementById("snapSelect").addEventListener("input", updateSnapBpmDisplay);
 
+    const playbackRateSlider = document.getElementById("playbackRateSlider");
+    const playbackRateValue = document.getElementById("playbackRateValue");
+    playbackRateSlider.addEventListener("input", function () {
+        playbackRate = parseFloat(this.value);
+        playbackRateValue.textContent = `${playbackRate.toFixed(2)}x`;
+        if (audio) {
+            audio.playbackRate = playbackRate;
+        }
+    });
+
     document.getElementById("backToMenuBtn").addEventListener("click", () => {
         document.getElementById("resultScreen").style.display = "none";
         document.getElementById("menuScreen").style.display = "block";
@@ -565,6 +577,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!audioFilename) return alert("No audio file declared in .osu!");
         const audioBlob = await zip.files[audioFilename].async("blob");
         audio = new Audio(URL.createObjectURL(audioBlob));
+        audio.playbackRate = playbackRate;
         if (backgroundFilename && zip.files[backgroundFilename]) {
             const bgBlob = await zip.files[backgroundFilename].async("blob");
             const bgUrl = URL.createObjectURL(bgBlob);
@@ -657,6 +670,7 @@ oszInput.addEventListener("change", async () => {
     if (!audioFilename) return alert("No audio file declared in uploaded .osu!");
     const audioBlob = await zip.files[audioFilename].async("blob");
     audio = new Audio(URL.createObjectURL(audioBlob));
+    audio.playbackRate = playbackRate;
 
     if (backgroundFilename && zip.files[backgroundFilename]) {
         const bgBlob = await zip.files[backgroundFilename].async("blob");
@@ -700,6 +714,7 @@ startButton.addEventListener("click", async () => {
     playScreen.style.display = "block";
     mapObjects = [];
     audio.currentTime = 0;
+    audio.playbackRate = playbackRate;
     audio.play();
     isRecording = true;
     comboCount = 1;
@@ -834,9 +849,9 @@ let lastReplayTime = null;
 function recordReplayFrame() {
     if (!isRecording || !audio) return;
 
-    const time = audio.currentTime * 1000; // ms
-    const delta = lastReplayTime === null ? 0 : Math.round(time - lastReplayTime);
-    lastReplayTime = time;
+    const actualTime = audio.currentTime * playbackRate * 1000; // ms, adjusted for playback rate
+    const delta = lastReplayTime === null ? 0 : Math.round(actualTime - lastReplayTime);
+    lastReplayTime = actualTime;
 
     const { osuX, osuY } = screenToOsuCoords(mouseX, mouseY);
 

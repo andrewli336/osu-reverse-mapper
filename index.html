@@ -99,7 +99,11 @@
                 <option value="16">1/16</option>
                 <option value="32">1/32</option>
             </select>
-            <span id="snapBpmInfo">–</span>
+            <span id="snapBpmInfo">–</span><br><br>
+
+            <label for="playbackRateSlider">Playback Rate:</label>
+            <input type="range" id="playbackRateSlider" min="0.1" max="2" value="1" step="0.05" />
+            <span id="playbackRateValue">1.0x</span>
         
             <fieldset>
                 <legend><strong>Key Bindings</strong></legend>
